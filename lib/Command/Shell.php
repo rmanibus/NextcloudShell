@@ -23,7 +23,7 @@
 
 
 namespace OCA\NextcloudShell\Command;
-
+use OCP\IUserManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,12 +31,26 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Question\Question;
 
+declare(ticks = 1);
+
+pcntl_signal(SIGINT, "signal_handler");
+
+function signal_handler($signal) {
+    switch($signal) {
+        case SIGINT:
+            print "Ctrl C\n";
+    }
+}
+
 class Shell extends Command {
 	/** @var  QuestionHelper */
 	protected $questionHelper;
-
-	public function __construct(QuestionHelper $questionHelper) {
+	/** @var IUserManager */
+	protected $userManager;
+	
+	public function __construct(QuestionHelper $questionHelper, IUserManager $userManager) {
 		$this->questionHelper = $questionHelper;
+		$this->userManager = $userManager;
 		parent::__construct();
 	}
 
@@ -53,13 +67,42 @@ class Shell extends Command {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
-			$user = $input->getArgument('user');
-			
+			$uid = $input->getArgument('user');
+			$userExists = $this->userManager->userExists($uid);
+
+			if ($userExists === false) {
+				$output->writeln('User "' . $uid . '" unknown.');
+				return;
+			}
+			$user = $this->userManager->get($uid);
+
 			$output->writeln('This is the shell');
+			$output->writeln('last login: '.date(DATE_RFC2822, $user->getLastLogin()));
+			$user->updateLastLoginTimestamp();
+			
 			do{
-				$question = new Question("$user@nextcloud $ ");
+				$question = new Question($user->getUID()."@nextcloud $ ");
 				$command = $this->questionHelper->ask($input, $output, $question);
-				$output->writeln("executing $command");
+				switch($command) {
+					case 'ls':
+						$output->writeln("ls !");
+						break;
+					case 'cp':
+						$output->writeln("cp !");
+						break;
+					case 'mv':
+						$output->writeln("mv !");
+						break;						
+					case 'rm':
+						$output->writeln("rm !");
+						break;
+					case 'cd':
+						$output->writeln("cd !");
+						break;
+					default:
+						$output->writeln("$command: command not found");
+				}
+				
 				 
 			} while(1);
 
