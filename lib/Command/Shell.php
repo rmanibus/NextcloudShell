@@ -24,6 +24,7 @@
 
 namespace OCA\NextcloudShell\Command;
 use OCP\IUserManager;
+use OC\Files\Filesystem;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -80,6 +81,12 @@ class Shell extends Command {
 			$output->writeln('last login: '.date(DATE_RFC2822, $user->getLastLogin()));
 			$user->updateLastLoginTimestamp();
 			
+			$home = $user->getHome();
+			
+			FileSystem::init($uid, $home);
+			
+			//$output->writeln(Filesystem::getRoot());
+			
 			do{
 				$question = new Question($user->getUID()."@nextcloud $ ");
 				$command = $this->questionHelper->ask($input, $output, $question);
@@ -98,6 +105,8 @@ class Shell extends Command {
 						break;
 					case 'cd':
 						$output->writeln("cd !");
+						break;
+					case '':
 						break;
 					default:
 						$output->writeln("$command: command not found");
