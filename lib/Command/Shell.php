@@ -58,7 +58,15 @@ class Shell extends Command {
 		);
 	}
 
+  protected function initCLI(OutputInterface $output){
+    $outputStyle = new OutputFormatterStyle('green', 'black');
+    $output->getFormatter()->setStyle('file', $outputStyle);
+    $outputStyle = new OutputFormatterStyle('blue', 'green');
+    $output->getFormatter()->setStyle('dir', $outputStyle);
+  }
+
 	protected function execute(InputInterface $input, OutputInterface $output) {
+      // Check user
 			$uid = $input->getArgument('user');
 			$userExists = $this->userManager->userExists($uid);
 
@@ -68,10 +76,15 @@ class Shell extends Command {
 			}
 			$user = $this->userManager->get($uid);
 
+      // Init CLI Style
+      $this->initCLI($output);
+
+      // Login Message
 			$output->writeln('This is the shell');
 			$output->writeln('last login: '.date(DATE_RFC2822, $user->getLastLogin()));
 			$user->updateLastLoginTimestamp();
 
+      // Init FileSystem
 			$absoluteHome = $user->getHome();
       $home = '/' . $uid . '/files';
 
@@ -79,14 +92,10 @@ class Shell extends Command {
 			$homeView = Filesystem::getView();
       $currentView = new View($home);
 
-      $outputStyle = new OutputFormatterStyle('green', 'black');
-      $output->getFormatter()->setStyle('file', $outputStyle);
-      $outputStyle = new OutputFormatterStyle('blue', 'green');
-      $output->getFormatter()->setStyle('dir', $outputStyle);
-
+      // CLI Loop
 			do{
 
-				$question = new Question($user->getUID()."@nextcloud $ ");
+				$question = new Question($user->getUID()."@nextcloud: ".$homeView->getRelativePath($currentView->getRoot())." $ ");
 				$cmd = $this->questionHelper->ask($input, $output, $question);
 				$cmdArray = explode(" ", $cmd);
 
@@ -148,7 +157,6 @@ class Shell extends Command {
 
             if(count($cmdArray) === 1){
               $currentView->chroot($home);
-              $output->writeln("currentroot: ".$currentView->getRoot());
               break;
             }
             if(!$currentView->file_exists($cmdArray[1])){
@@ -163,7 +171,6 @@ class Shell extends Command {
             //[TODO] Still need to handle ".." in path
 
             $currentView->chroot($currentView->getRoot().'/'.$cmdArray[1]);
-            $output->writeln("currentroot: ".$currentView->getRoot());
 
 						break;
 					case '':
