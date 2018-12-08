@@ -20,7 +20,6 @@ class Cd extends BinBase {
     if(end($currentLocationArray) === "" ){
         array_pop ( $currentLocationArray );
     }
-    var_dump($currentLocationArray);
 
     $relativeTargetLocationArray = explode("/", $cmd->getArg(1));
 
@@ -31,7 +30,6 @@ class Cd extends BinBase {
         array_push ($currentLocationArray, $item) ;
       }
     }
-    var_dump($currentLocationArray);
 
     $targetLocation = implode("/", $currentLocationArray);
 
