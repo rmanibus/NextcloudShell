@@ -59,7 +59,7 @@ class Shell extends Command {
 	}
 
   protected function initCLI(OutputInterface $output){
-    $outputStyle = new OutputFormatterStyle('green', 'black');
+    $outputStyle = new OutputFormatterStyle('cyan', 'black');
     $output->getFormatter()->setStyle('PS1_user', $outputStyle);
     $outputStyle = new OutputFormatterStyle('yellow', 'black');
     $output->getFormatter()->setStyle('PS1_path', $outputStyle);
