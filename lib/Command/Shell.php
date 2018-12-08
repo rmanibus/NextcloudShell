@@ -235,6 +235,10 @@ class Shell extends Command {
             $currentView->chroot($currentView->getRoot().'/'.$cmdArray[1]);
 
 						break;
+          case 'sh':
+            //This should allow to execute a basic shell script: parse file passed in first operand, execute each line.
+            $output->writeln("Not implemented yet");
+            break;
 					case '':
 						break;
 					default:
