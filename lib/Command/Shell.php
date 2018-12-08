@@ -87,7 +87,8 @@ class Shell extends Command {
 
       //[TODO] Autocompletion (might have to extends the Question helper for this)
       //[TODO] History
-
+      //[TODO] Redirection (<>)
+      
       // Intercept Ctrl-C signal
       $this->listen();
 
