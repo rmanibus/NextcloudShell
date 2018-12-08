@@ -177,10 +177,33 @@ class Shell extends Command {
             }
 
 						break;
-
+            case 'touch':
+              if(count($cmdArray) === 1){
+                $output->writeln("touch: missing file operand");
+                break;
+              }
+              if($currentView->touch($cmdArray[1])){
+                $output->writeln("touch $cmdArray[1]");
+              }
+              else{
+                $output->writeln("could not touch");
+              }
+  						break;
 					case 'rm':
-						$output->writeln("rm !");
+            if(count($cmdArray) === 1){
+              $output->writeln("rm: missing file operand");
+              break;
+            }
+            if($currentView->unlink($cmdArray[1])){
+              $output->writeln("deleted $cmdArray[1]");
+            }
+            else{
+              $output->writeln("could not remove");
+            }
 						break;
+          case 'rmdir':
+            $output->writeln("rmdir !");
+            break;
           case 'mkdir':
             if(count($cmdArray) === 1){
               $output->writeln("mkdir: missing operand");
