@@ -60,6 +60,11 @@ class Shell extends Command {
 
   protected function initCLI(OutputInterface $output){
     $outputStyle = new OutputFormatterStyle('green', 'black');
+    $output->getFormatter()->setStyle('PS1_user', $outputStyle);
+    $outputStyle = new OutputFormatterStyle('yellow', 'black');
+    $output->getFormatter()->setStyle('PS1_path', $outputStyle);
+
+    $outputStyle = new OutputFormatterStyle('green', 'black');
     $output->getFormatter()->setStyle('file', $outputStyle);
     $outputStyle = new OutputFormatterStyle('blue', 'green');
     $output->getFormatter()->setStyle('dir', $outputStyle);
@@ -95,7 +100,7 @@ class Shell extends Command {
       // CLI Loop
 			do{
 
-				$question = new Question($user->getUID()."@nextcloud: ".$homeView->getRelativePath($currentView->getRoot())." $ ");
+				$question = new Question('<PS1_user>'.$user->getUID()."@nextcloud</PS1_user>: <PS1_path>".$homeView->getRelativePath($currentView->getRoot())."</PS1_path> $ ");
 				$cmd = $this->questionHelper->ask($input, $output, $question);
 
         // use get csv to preserve value inside quote
