@@ -97,7 +97,9 @@ class Shell extends Command {
 
 				$question = new Question($user->getUID()."@nextcloud: ".$homeView->getRelativePath($currentView->getRoot())." $ ");
 				$cmd = $this->questionHelper->ask($input, $output, $question);
-				$cmdArray = explode(" ", $cmd);
+
+        // use get csv to preserve value inside quote
+				$cmdArray = str_getcsv($cmd, ' ');
 
 			switch($cmdArray[0]) {
 
