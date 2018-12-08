@@ -47,10 +47,10 @@ class Sh extends BinBase {
         // process the line read.
         $lineCmd = new Cmd($line);
 
-        if(array_key_exists ( $cmd->getProgram() , $this->shell->getPrograms() )){
-          $this->shell->getPrograms()[$cmd->getProgram()]->exec($lineCmd, $output, $currentView);
+        if(array_key_exists ( $lineCmd->getProgram() , $this->shell->getPrograms() )){
+          $this->shell->getPrograms()[$lineCmd->getProgram()]->exec($lineCmd, $output, $currentView);
         }else{
-          $output->writeln($cmd->getProgram().": command not found");
+          $output->writeln($lineCmd->getProgram().": command not found");
         }
       }
 
