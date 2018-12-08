@@ -34,7 +34,9 @@ class Rm extends BinBase {
       $output->writeln("rm: missing file operand");
       return;
     }
-    if($currentView->unlink($cmd->getArg(1))){
+    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+
+    if($this->shell->getHomeView()->unlink($destinationAbsolutePath)){
       $output->writeln("deleted ".$cmd->getArg(1));
     }
     else{

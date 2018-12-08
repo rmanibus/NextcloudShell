@@ -30,12 +30,12 @@ abstract class BinBase implements IBin {
   public function __construct($shell){
     $this->shell = $shell;
   }
-
+  // This get the absolute path in the user context. (It mean that "/" is in fact "<user>/files/" )
   public function getAbsolutePath($currentView, $relativePath){
 
     $currentLocationArray = explode(  "/" , $this->shell->getHomeView()->getRelativePath($currentView->getRoot()));
     array_shift ( $currentLocationArray );
-    
+
     if(end($currentLocationArray) === "" ){
         array_pop ( $currentLocationArray );
     }
