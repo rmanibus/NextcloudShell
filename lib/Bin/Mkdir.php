@@ -34,7 +34,9 @@ class Mkdir extends BinBase {
       $output->writeln("mkdir: missing operand");
       return;
     }
-    if($currentView->mkdir($cmd->getArg(1))){
+    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+
+    if($this->shell->getHomeView()->mkdir($destinationAbsolutePath)){
       $output->writeln("created ".$cmd->getArg(1));
     }else{
       $output->writeln("could not create dir");
