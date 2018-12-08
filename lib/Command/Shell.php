@@ -96,6 +96,7 @@ class Shell extends Command {
             if(count($cmdArray) === 1){
               $cmdArray[1] = "";
             }
+            //[TODO] Add some formating option (-l ...)
             array_walk ( $currentView->getDirectoryContent($cmdArray[1]) ,function ($fileInfo) use ($output)  {
               if($fileInfo->getType() ==='dir'){
                 $output->writeln('<dir>'.$fileInfo->getName().'</dir>');
@@ -122,6 +123,9 @@ class Shell extends Command {
 							$output->writeln("cp: cannot stat $cmdArray[1]: No such file or directory");
               break;
 						}
+
+            //[TODO] Check if destination directory exist
+            //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
 
 						if($view->copy($cmdArray[1], $cmdArray[2])){
               $output->writeln("cp $cmdArray[1] => $cmdArray[2]");
@@ -155,8 +159,8 @@ class Shell extends Command {
               $output->writeln("$cmdArray[1]: Not a directory");
               break;
             }
-            
-            // Still need to handle ".." in path
+
+            //[TODO] Still need to handle ".." in path
 
             $currentView->chroot($currentView->getRoot().'/'.$cmdArray[1]);
             $output->writeln("currentroot: ".$currentView->getRoot());
