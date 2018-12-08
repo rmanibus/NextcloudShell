@@ -26,6 +26,7 @@ namespace OCA\NextcloudShell\Command;
 
 use OCA\NextcloudShell\Util\Cmd;
 
+use OCA\NextcloudShell\Bin\Cat;
 use OCA\NextcloudShell\Bin\Cd;
 use OCA\NextcloudShell\Bin\Cp;
 use OCA\NextcloudShell\Bin\Ls;
@@ -129,6 +130,7 @@ class Shell extends Command {
 
   private function loadPrograms(){
     //[TODO] get this by reflexion (all class implementing IBin).
+    $this->programs['cat'] = new Cat($this);
     $this->programs['cp'] = new Cp($this);
     $this->programs['ls'] = new Ls($this);
     $this->programs['cd'] = new Cd($this);

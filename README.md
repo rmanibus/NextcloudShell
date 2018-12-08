@@ -12,7 +12,7 @@ php occ nextcloudshell:run <uid>
 ```
 implemented commands:
 
-ls, cd, mv, cp, rm, touch, mkdir
+cat, ls, cd, mv, cp, rm, touch, mkdir
 
 ## Building the app
 
