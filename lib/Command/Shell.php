@@ -33,23 +33,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Question\Question;
 
-declare(ticks = 1);
-
-pcntl_signal(SIGINT, "signal_handler");
-
-function signal_handler($signal) {
-    switch($signal) {
-        case SIGINT:
-            print "Ctrl C\n";
-    }
-}
-
 class Shell extends Command {
 	/** @var  QuestionHelper */
 	protected $questionHelper;
 	/** @var IUserManager */
 	protected $userManager;
-	
+
 	public function __construct(QuestionHelper $questionHelper, IUserManager $userManager) {
 		$this->questionHelper = $questionHelper;
 		$this->userManager = $userManager;
@@ -60,7 +49,7 @@ class Shell extends Command {
 		$this
 			->setName('nextcloudshell:run')
 			->setDescription('Run Nextcloud shell.');
-			
+
 		$this->addArgument(
 			'user',
 			InputArgument::REQUIRED,
@@ -81,7 +70,7 @@ class Shell extends Command {
 			$output->writeln('This is the shell');
 			$output->writeln('last login: '.date(DATE_RFC2822, $user->getLastLogin()));
 			$user->updateLastLoginTimestamp();
-			
+
 			$home = $user->getHome();
 
 			FileSystem::init($uid,  '/' . $uid . '/files');
@@ -90,18 +79,25 @@ class Shell extends Command {
 			var_dump();
 			//var_dump($view->getDirectoryContent(''));
 
-			
+
 			do{
 				$question = new Question($user->getUID()."@nextcloud $ ");
 				$cmd = $this->questionHelper->ask($input, $output, $question);
 				$cmdArray = explode(" ", $cmd);
 			switch($cmdArray[0]) {
-				
+
 					case 'ls':
-						$output->writeln("ls !");
+            if(count($cmdArray) === 1){
+              $cmdArray[1] = "";
+            }
+            array_walk ( $view->getDirectoryContent($cmdArray[1]) ,function ($fileInfo) use ($output)  {
+                $output->writeln($fileInfo->getName());
+            });
+
 						break;
-						
+
 					case 'cp':
+
 						if(count($cmdArray) === 1){
 							$output->writeln("cp: missing file operand");
 							break;
@@ -112,18 +108,25 @@ class Shell extends Command {
 						}
 
 						// Check if inputfile exist ... (should use stat ?)
-						if($view->file_exists($cmdArray[1])){
-							$view->copy($cmdArray[1], $cmdArray[2]);
-							$output->writeln("cp $cmdArray[1] => $cmdArray[2]");
-						}else{
+						if(!$view->file_exists($cmdArray[1])){
 							$output->writeln("cp: cannot stat $cmdArray[1]: No such file or directory");
+              break;
 						}
-						
+
+						if($view->copy($cmdArray[1], $cmdArray[2])){
+              $output->writeln("cp $cmdArray[1] => $cmdArray[2]");
+            }else{
+              $output->writeln("could not copy");
+            }
+
+
+
+
 						break;
-						
+
 					case 'mv':
 						$output->writeln("mv !");
-						break;						
+						break;
 					case 'rm':
 						$output->writeln("rm !");
 						break;
@@ -135,8 +138,8 @@ class Shell extends Command {
 					default:
 						$output->writeln("$command: command not found");
 				}
-				
-				 
+
+
 			} while(1);
 
 
