@@ -72,10 +72,12 @@ class Shell extends Command {
 			$output->writeln('last login: '.date(DATE_RFC2822, $user->getLastLogin()));
 			$user->updateLastLoginTimestamp();
 
-			$home = $user->getHome();
+			$absoluteHome = $user->getHome();
+      $home = '/' . $uid . '/files';
 
-			FileSystem::init($uid,  '/' . $uid . '/files');
-			$view = Filesystem::getView();
+			FileSystem::init($uid,  $home);
+			$homeView = Filesystem::getView();
+      $currentView = new View($home);
 
       $outputStyle = new OutputFormatterStyle('green', 'black');
       $output->getFormatter()->setStyle('file', $outputStyle);
@@ -94,7 +96,7 @@ class Shell extends Command {
             if(count($cmdArray) === 1){
               $cmdArray[1] = "";
             }
-            array_walk ( $view->getDirectoryContent($cmdArray[1]) ,function ($fileInfo) use ($output)  {
+            array_walk ( $currentView->getDirectoryContent($cmdArray[1]) ,function ($fileInfo) use ($output)  {
               if($fileInfo->getType() ==='dir'){
                 $output->writeln('<dir>'.$fileInfo->getName().'</dir>');
               }else{
@@ -139,7 +141,26 @@ class Shell extends Command {
 						$output->writeln("rm !");
 						break;
 					case 'cd':
-						$output->writeln("cd !");
+
+            if(count($cmdArray) === 1){
+              $currentView->chroot($home);
+              $output->writeln("currentroot: ".$currentView->getRoot());
+              break;
+            }
+            if(!$currentView->file_exists($cmdArray[1])){
+              $output->writeln("$cmdArray[1]: No such file or directory");
+              break;
+            }
+            if(!$currentView->is_dir($cmdArray[1])){
+              $output->writeln("$cmdArray[1]: Not a directory");
+              break;
+            }
+            
+            // Still need to handle ".." in path
+
+            $currentView->chroot($currentView->getRoot().'/'.$cmdArray[1]);
+            $output->writeln("currentroot: ".$currentView->getRoot());
+
 						break;
 					case '':
 						break;
