@@ -1,8 +1,8 @@
 <?php
 /**
- * @copyright Copyright (c) 2017 Bjoern Schiessle <bjoern@schiessle.org>
+ * @copyright Copyright (c) 2018 Loïc Hermann <loic.hermann@free.fr>
  *
- * @author Bjoern Schiessle <bjoern@schiessle.org>
+ * @author Loïc Hermann
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -78,6 +78,10 @@ class Shell extends Command {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
+    
+      //[TODO] Autocompletion (might have to extends the Question helper for this)
+      //[TODO] History
+
       // Check user
 			$uid = $input->getArgument('user');
 			$userExists = $this->userManager->userExists($uid);

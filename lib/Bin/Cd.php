@@ -42,8 +42,6 @@ class Cd extends BinBase {
       return;
     }
 
-    //[TODO] Still need to handle ".." in path
-
     $currentView->chroot($this->shell->getHomeView()->getRoot().$targetLocation);
 
 
