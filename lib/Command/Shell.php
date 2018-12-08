@@ -78,7 +78,7 @@ class Shell extends Command {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
-    
+
       //[TODO] Autocompletion (might have to extends the Question helper for this)
       //[TODO] History
 
@@ -114,7 +114,9 @@ class Shell extends Command {
 				$question = new Question('<PS1_user>'.$user->getUID()."@nextcloud</PS1_user>: <PS1_path>".$this->homeView->getRelativePath($currentView->getRoot())."</PS1_path> $ ");
 
         $cmd = new Cmd($this->questionHelper->ask($input, $output, $question));
-
+        if($cmd->getProgram() === "exit"){
+          break;
+        }
         if(array_key_exists ( $cmd->getProgram() , $this->programs )){
           $this->programs[$cmd->getProgram()]->exec($cmd, $output, $currentView);
         }else{
