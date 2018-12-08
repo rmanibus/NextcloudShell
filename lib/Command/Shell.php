@@ -122,6 +122,7 @@ class Shell extends Command {
 	}
 
   private function loadPrograms(){
+    //[TODO] get this by reflexion (all class implementing IBin).
     $this->programs['cp'] = new Cp($this);
     $this->programs['ls'] = new Ls($this);
     $this->programs['cd'] = new Cd($this);
@@ -132,6 +133,7 @@ class Shell extends Command {
   }
 
   protected function initCLI(OutputInterface $output){
+    //[TODO] allow custom setings thru nextcloudrc file.
     $outputStyle = new OutputFormatterStyle('cyan', 'black');
     $output->getFormatter()->setStyle('PS1_user', $outputStyle);
     $outputStyle = new OutputFormatterStyle('yellow', 'black');
@@ -142,7 +144,7 @@ class Shell extends Command {
     $outputStyle = new OutputFormatterStyle('blue', 'green');
     $output->getFormatter()->setStyle('dir', $outputStyle);
   }
-  
+
   public function getHomeView(){
     return $this->homeView;
   }
