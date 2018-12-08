@@ -38,9 +38,10 @@ class Cp extends BinBase {
       $output->writeln("cp: missing destination file operand after ".$cmd->getArg(1));
       return;
     }
-
+    $sourceAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(1));
+    $destinationAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(2));
     // Check if inputfile exist ... (should use stat ?)
-    if(!$currentView->file_exists($cmd->getArg(1))){
+    if(!$this->shell->getHomeView()->file_exists( $sourceAbsolutePath )){
       $output->writeln("cp: cannot stat ".$cmd->getArg(1).": No such file or directory");
       return;
     }
@@ -48,7 +49,7 @@ class Cp extends BinBase {
     //[TODO] Check if destination directory exist
     //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
 
-    if($currentView->copy($cmd->getArg(1), $cmd->getArg(2))){
+    if($this->shell->getHomeView()->copy($sourceAbsolutePath , $destinationAbsolutePath)){
       $output->writeln("cp ".$cmd->getArg(1)." => ".$cmd->getArg(2));
     }else{
       $output->writeln("could not copy");

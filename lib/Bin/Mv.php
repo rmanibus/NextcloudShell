@@ -39,8 +39,6 @@ class Mv extends BinBase {
       return;
     }
 
-
-
     $sourceAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(1));
     $destinationAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(2));
     // Check if inputfile exist ... (should use stat ?)
