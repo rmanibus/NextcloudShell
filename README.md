@@ -1,6 +1,19 @@
 # Nextcloud Shell
 Place this app in **nextcloud/apps/**
 
+This app implements a basic shell allowing to execute basic operation on files within the selected user Home.
+The goal is to implement a SSH shell for Nextcloud users.
+
+This app do not provide any kind of authentication as it will be handled by OpenSSH.
+
+start with:
+```
+php occ nextcloudshell:run <uid>
+```
+implemented commands:
+
+ls, cd, mv, cp, rm, touch, mkdir
+
 ## Building the app
 
 The app can be built by using the provided Makefile by running:
