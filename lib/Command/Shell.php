@@ -32,6 +32,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class Shell extends Command {
 	/** @var  QuestionHelper */
@@ -75,15 +76,18 @@ class Shell extends Command {
 
 			FileSystem::init($uid,  '/' . $uid . '/files');
 			$view = Filesystem::getView();
-			var_dump($view->getRoot());
-			var_dump();
-			//var_dump($view->getDirectoryContent(''));
 
+      $outputStyle = new OutputFormatterStyle('green', 'black');
+      $output->getFormatter()->setStyle('file', $outputStyle);
+      $outputStyle = new OutputFormatterStyle('blue', 'green');
+      $output->getFormatter()->setStyle('dir', $outputStyle);
 
 			do{
+
 				$question = new Question($user->getUID()."@nextcloud $ ");
 				$cmd = $this->questionHelper->ask($input, $output, $question);
 				$cmdArray = explode(" ", $cmd);
+
 			switch($cmdArray[0]) {
 
 					case 'ls':
@@ -91,7 +95,11 @@ class Shell extends Command {
               $cmdArray[1] = "";
             }
             array_walk ( $view->getDirectoryContent($cmdArray[1]) ,function ($fileInfo) use ($output)  {
-                $output->writeln($fileInfo->getName());
+              if($fileInfo->getType() ==='dir'){
+                $output->writeln('<dir>'.$fileInfo->getName().'</dir>');
+              }else{
+                $output->writeln('<file>'.$fileInfo->getName().'</file>');
+              }
             });
 
 						break;
