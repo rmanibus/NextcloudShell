@@ -64,6 +64,11 @@ class Shell extends Command {
     $this->loadPrograms();
 
 		parent::__construct();
+
+    if (!extension_loaded('pcntl')) {
+      throw new \RuntimeException('PCNTL extension is not loaded.');
+    }
+
 	}
 
 	protected function configure() {
@@ -83,7 +88,11 @@ class Shell extends Command {
       //[TODO] Autocompletion (might have to extends the Question helper for this)
       //[TODO] History
 
+      // Intercept Ctrl-C signal
+      $this->listen();
+
       // Check user
+
 			$uid = $input->getArgument('user');
 			$userExists = $this->userManager->userExists($uid);
 
@@ -151,6 +160,16 @@ class Shell extends Command {
     $output->getFormatter()->setStyle('file', $outputStyle);
     $outputStyle = new OutputFormatterStyle('blue', 'green');
     $output->getFormatter()->setStyle('dir', $outputStyle);
+  }
+
+  private function listen()
+  {
+      $handler = function ($code) {
+        // Don't do anything for now
+      };
+      // Ctrl + C
+      pcntl_signal(SIGINT, $handler);
+
   }
 
   public function getHomeView(){
