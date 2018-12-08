@@ -129,6 +129,9 @@ class Shell extends Command {
         if($cmd->getProgram() === "exit"){
           break;
         }
+        if($cmd->getProgram() === null){
+          continue;
+        }
         if(array_key_exists ( $cmd->getProgram() , $this->programs )){
           $this->programs[$cmd->getProgram()]->exec($cmd, $output, $currentView);
         }else{
