@@ -135,7 +135,7 @@ class Shell extends Command {
 						}
 
 						// Check if inputfile exist ... (should use stat ?)
-						if(!$view->file_exists($cmdArray[1])){
+						if(!$currentView->file_exists($cmdArray[1])){
 							$output->writeln("cp: cannot stat $cmdArray[1]: No such file or directory");
               break;
 						}
@@ -143,20 +143,41 @@ class Shell extends Command {
             //[TODO] Check if destination directory exist
             //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
 
-						if($view->copy($cmdArray[1], $cmdArray[2])){
+						if($currentView->copy($cmdArray[1], $cmdArray[2])){
               $output->writeln("cp $cmdArray[1] => $cmdArray[2]");
             }else{
               $output->writeln("could not copy");
             }
 
-
-
-
 						break;
 
 					case 'mv':
-						$output->writeln("mv !");
+
+            if(count($cmdArray) === 1){
+              $output->writeln("mv: missing file operand");
+              break;
+            }
+            if(count($cmdArray) === 2){
+              $output->writeln("mv: missing destination file operand after $cmdArray[1]");
+              break;
+            }
+            // Check if inputfile exist ... (should use stat ?)
+            if(!$currentView->file_exists($cmdArray[1])){
+              $output->writeln("mv: cannot stat $cmdArray[1]: No such file or directory");
+              break;
+            }
+
+            //[TODO] Check if destination directory exist
+            //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
+            
+            if($currentView->rename($cmdArray[1], $cmdArray[2])){
+              $output->writeln("mv $cmdArray[1] => $cmdArray[2]");
+            }else{
+              $output->writeln("could not move");
+            }
+
 						break;
+
 					case 'rm':
 						$output->writeln("rm !");
 						break;
