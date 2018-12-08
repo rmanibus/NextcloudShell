@@ -23,6 +23,7 @@
 
 
 namespace OCA\NextcloudShell\Command;
+use OCA\NextcloudShell\Util\Cmd;
 use OCP\IUserManager;
 use OC\Files\Filesystem;
 use OC\Files\View;
@@ -101,19 +102,16 @@ class Shell extends Command {
 			do{
 
 				$question = new Question('<PS1_user>'.$user->getUID()."@nextcloud</PS1_user>: <PS1_path>".$homeView->getRelativePath($currentView->getRoot())."</PS1_path> $ ");
-				$cmd = $this->questionHelper->ask($input, $output, $question);
+        $cmd = new Cmd($this->questionHelper->ask($input, $output, $question));
 
-        // use get csv to preserve value inside quote
-				$cmdArray = str_getcsv($cmd, ' ');
-
-			switch($cmdArray[0]) {
+			switch($cmd->getProgram()) {
 
 					case 'ls':
-            if(count($cmdArray) === 1){
-              $cmdArray[1] = "";
+            if($cmd->getNbArgs() === 1){
+              $cmd->setArg(1, "");
             }
             //[TODO] Add some formating option (-l ...)
-            array_walk ( $currentView->getDirectoryContent($cmdArray[1]) ,function ($fileInfo) use ($output)  {
+            array_walk ( $currentView->getDirectoryContent($cmd->getArg(1)) ,function ($fileInfo) use ($output)  {
               if($fileInfo->getType() ==='dir'){
                 $output->writeln('<dir>'.$fileInfo->getName().'</dir>');
               }else{
@@ -125,26 +123,26 @@ class Shell extends Command {
 
 					case 'cp':
 
-						if(count($cmdArray) === 1){
+						if($cmd->getNbArgs() === 1){
 							$output->writeln("cp: missing file operand");
 							break;
 						}
-						if(count($cmdArray) === 2){
-							$output->writeln("cp: missing destination file operand after $cmdArray[1]");
+						if($cmd->getNbArgs() === 2){
+							$output->writeln("cp: missing destination file operand after ".$cmd->getArg(1));
 							break;
 						}
 
 						// Check if inputfile exist ... (should use stat ?)
-						if(!$currentView->file_exists($cmdArray[1])){
-							$output->writeln("cp: cannot stat $cmdArray[1]: No such file or directory");
+						if(!$currentView->file_exists($cmd->getArg(1))){
+							$output->writeln("cp: cannot stat ".$cmd->getArg(1).": No such file or directory");
               break;
 						}
 
             //[TODO] Check if destination directory exist
             //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
 
-						if($currentView->copy($cmdArray[1], $cmdArray[2])){
-              $output->writeln("cp $cmdArray[1] => $cmdArray[2]");
+						if($currentView->copy($cmd->getArg(1), $cmd->getArg(2))){
+              $output->writeln("cp ".$cmd->getArg(1)." => ".$cmd->getArg(2));
             }else{
               $output->writeln("could not copy");
             }
@@ -153,49 +151,49 @@ class Shell extends Command {
 
 					case 'mv':
 
-            if(count($cmdArray) === 1){
+            if($cmd->getNbArgs() === 1){
               $output->writeln("mv: missing file operand");
               break;
             }
-            if(count($cmdArray) === 2){
-              $output->writeln("mv: missing destination file operand after $cmdArray[1]");
+            if($cmd->getNbArgs() === 2){
+              $output->writeln("mv: missing destination file operand after ".$cmd->getArg(1));
               break;
             }
             // Check if inputfile exist ... (should use stat ?)
-            if(!$currentView->file_exists($cmdArray[1])){
-              $output->writeln("mv: cannot stat $cmdArray[1]: No such file or directory");
+            if(!$currentView->file_exists($cmd->getArg(1))){
+              $output->writeln("mv: cannot stat ".$cmd->getArg(1).": No such file or directory");
               break;
             }
 
             //[TODO] Check if destination directory exist
             //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
 
-            if($currentView->rename($cmdArray[1], $cmdArray[2])){
-              $output->writeln("mv $cmdArray[1] => $cmdArray[2]");
+            if($currentView->rename($cmd->getArg(1), $cmd->getArg(2))){
+              $output->writeln("mv ".$cmd->getArg(1)." => ".$cmd->getArg(2));
             }else{
               $output->writeln("could not move");
             }
 
 						break;
             case 'touch':
-              if(count($cmdArray) === 1){
+              if($cmd->getNbArgs() === 1){
                 $output->writeln("touch: missing file operand");
                 break;
               }
-              if($currentView->touch($cmdArray[1])){
-                $output->writeln("touch $cmdArray[1]");
+              if($currentView->touch($cmd->getArg(1))){
+                $output->writeln("touch ".$cmd->getArg(1));
               }
               else{
                 $output->writeln("could not touch");
               }
   						break;
 					case 'rm':
-            if(count($cmdArray) === 1){
+            if($cmd->getNbArgs()=== 1){
               $output->writeln("rm: missing file operand");
               break;
             }
-            if($currentView->unlink($cmdArray[1])){
-              $output->writeln("deleted $cmdArray[1]");
+            if($currentView->unlink($cmd->getArg(1))){
+              $output->writeln("deleted ".$cmd->getArg(1));
             }
             else{
               $output->writeln("could not remove");
@@ -205,34 +203,34 @@ class Shell extends Command {
             $output->writeln("rmdir !");
             break;
           case 'mkdir':
-            if(count($cmdArray) === 1){
+            if($cmd->getNbArgs() === 1){
               $output->writeln("mkdir: missing operand");
               break;
             }
-            if($currentView->mkdir($cmdArray[1])){
-              $output->writeln("created $cmdArray[1]");
+            if($currentView->mkdir($cmd->getArg(1))){
+              $output->writeln("created ".$cmd->getArg(1));
             }else{
               $output->writeln("could not create dir");
             }
             break;
 					case 'cd':
 
-            if(count($cmdArray) === 1){
+            if($cmd->getNbArgs() === 1){
               $currentView->chroot($home);
               break;
             }
-            if(!$currentView->file_exists($cmdArray[1])){
-              $output->writeln("$cmdArray[1]: No such file or directory");
+            if(!$currentView->file_exists($cmd->getArg(1))){
+              $output->writeln($cmd->getArg(1).": No such file or directory");
               break;
             }
-            if(!$currentView->is_dir($cmdArray[1])){
-              $output->writeln("$cmdArray[1]: Not a directory");
+            if(!$currentView->is_dir($cmd->getArg(1))){
+              $output->writeln($cmd->getArg(1).": Not a directory");
               break;
             }
 
             //[TODO] Still need to handle ".." in path
 
-            $currentView->chroot($currentView->getRoot().'/'.$cmdArray[1]);
+            $currentView->chroot($currentView->getRoot().'/'.$cmd->getArg(1));
 
 						break;
           case 'sh':
