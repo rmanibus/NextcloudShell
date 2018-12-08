@@ -25,6 +25,7 @@
 namespace OCA\NextcloudShell\Command;
 use OCP\IUserManager;
 use OC\Files\Filesystem;
+use OC\Files\View;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -82,21 +83,44 @@ class Shell extends Command {
 			$user->updateLastLoginTimestamp();
 			
 			$home = $user->getHome();
-			
-			FileSystem::init($uid, $home);
-			
-			//$output->writeln(Filesystem::getRoot());
+
+			FileSystem::init($uid,  '/' . $uid . '/files');
+			$view = Filesystem::getView();
+			var_dump($view->getRoot());
+			var_dump();
+			//var_dump($view->getDirectoryContent(''));
+
 			
 			do{
 				$question = new Question($user->getUID()."@nextcloud $ ");
-				$command = $this->questionHelper->ask($input, $output, $question);
-				switch($command) {
+				$cmd = $this->questionHelper->ask($input, $output, $question);
+				$cmdArray = explode(" ", $cmd);
+			switch($cmdArray[0]) {
+				
 					case 'ls':
 						$output->writeln("ls !");
 						break;
+						
 					case 'cp':
-						$output->writeln("cp !");
+						if(count($cmdArray) === 1){
+							$output->writeln("cp: missing file operand");
+							break;
+						}
+						if(count($cmdArray) === 2){
+							$output->writeln("cp: missing destination file operand after $cmdArray[1]");
+							break;
+						}
+
+						// Check if inputfile exist ... (should use stat ?)
+						if($view->file_exists($cmdArray[1])){
+							$view->copy($cmdArray[1], $cmdArray[2]);
+							$output->writeln("cp $cmdArray[1] => $cmdArray[2]");
+						}else{
+							$output->writeln("cp: cannot stat $cmdArray[1]: No such file or directory");
+						}
+						
 						break;
+						
 					case 'mv':
 						$output->writeln("mv !");
 						break;						
