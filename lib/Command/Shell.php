@@ -23,7 +23,17 @@
 
 
 namespace OCA\NextcloudShell\Command;
+
 use OCA\NextcloudShell\Util\Cmd;
+
+use OCA\NextcloudShell\Bin\Cd;
+use OCA\NextcloudShell\Bin\Cp;
+use OCA\NextcloudShell\Bin\Ls;
+use OCA\NextcloudShell\Bin\Mkdir;
+use OCA\NextcloudShell\Bin\Mv;
+use OCA\NextcloudShell\Bin\Rm;
+use OCA\NextcloudShell\Bin\Touch;
+
 use OCP\IUserManager;
 use OC\Files\Filesystem;
 use OC\Files\View;
@@ -40,10 +50,18 @@ class Shell extends Command {
 	protected $questionHelper;
 	/** @var IUserManager */
 	protected $userManager;
+  /** @var View */
+  protected $homeView ;
+  /** @var array IBin */
+  protected $programs = array();
 
 	public function __construct(QuestionHelper $questionHelper, IUserManager $userManager) {
 		$this->questionHelper = $questionHelper;
 		$this->userManager = $userManager;
+
+    // We need a way to get all class implementing IBin. That would make this way simpler.
+    $this->loadPrograms();
+
 		parent::__construct();
 	}
 
@@ -58,18 +76,6 @@ class Shell extends Command {
 			'user which should be recovered'
 		);
 	}
-
-  protected function initCLI(OutputInterface $output){
-    $outputStyle = new OutputFormatterStyle('cyan', 'black');
-    $output->getFormatter()->setStyle('PS1_user', $outputStyle);
-    $outputStyle = new OutputFormatterStyle('yellow', 'black');
-    $output->getFormatter()->setStyle('PS1_path', $outputStyle);
-
-    $outputStyle = new OutputFormatterStyle('green', 'black');
-    $output->getFormatter()->setStyle('file', $outputStyle);
-    $outputStyle = new OutputFormatterStyle('blue', 'green');
-    $output->getFormatter()->setStyle('dir', $outputStyle);
-  }
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
       // Check user
@@ -95,158 +101,49 @@ class Shell extends Command {
       $home = '/' . $uid . '/files';
 
 			FileSystem::init($uid,  $home);
-			$homeView = Filesystem::getView();
+			$this->homeView = Filesystem::getView();
       $currentView = new View($home);
 
       // CLI Loop
 			do{
 
-				$question = new Question('<PS1_user>'.$user->getUID()."@nextcloud</PS1_user>: <PS1_path>".$homeView->getRelativePath($currentView->getRoot())."</PS1_path> $ ");
+				$question = new Question('<PS1_user>'.$user->getUID()."@nextcloud</PS1_user>: <PS1_path>".$this->homeView->getRelativePath($currentView->getRoot())."</PS1_path> $ ");
+
         $cmd = new Cmd($this->questionHelper->ask($input, $output, $question));
 
-			switch($cmd->getProgram()) {
-
-					case 'ls':
-            if($cmd->getNbArgs() === 1){
-              $cmd->setArg(1, "");
-            }
-            //[TODO] Add some formating option (-l ...)
-            array_walk ( $currentView->getDirectoryContent($cmd->getArg(1)) ,function ($fileInfo) use ($output)  {
-              if($fileInfo->getType() ==='dir'){
-                $output->writeln('<dir>'.$fileInfo->getName().'</dir>');
-              }else{
-                $output->writeln('<file>'.$fileInfo->getName().'</file>');
-              }
-            });
-
-						break;
-
-					case 'cp':
-
-						if($cmd->getNbArgs() === 1){
-							$output->writeln("cp: missing file operand");
-							break;
-						}
-						if($cmd->getNbArgs() === 2){
-							$output->writeln("cp: missing destination file operand after ".$cmd->getArg(1));
-							break;
-						}
-
-						// Check if inputfile exist ... (should use stat ?)
-						if(!$currentView->file_exists($cmd->getArg(1))){
-							$output->writeln("cp: cannot stat ".$cmd->getArg(1).": No such file or directory");
-              break;
-						}
-
-            //[TODO] Check if destination directory exist
-            //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
-
-						if($currentView->copy($cmd->getArg(1), $cmd->getArg(2))){
-              $output->writeln("cp ".$cmd->getArg(1)." => ".$cmd->getArg(2));
-            }else{
-              $output->writeln("could not copy");
-            }
-
-						break;
-
-					case 'mv':
-
-            if($cmd->getNbArgs() === 1){
-              $output->writeln("mv: missing file operand");
-              break;
-            }
-            if($cmd->getNbArgs() === 2){
-              $output->writeln("mv: missing destination file operand after ".$cmd->getArg(1));
-              break;
-            }
-            // Check if inputfile exist ... (should use stat ?)
-            if(!$currentView->file_exists($cmd->getArg(1))){
-              $output->writeln("mv: cannot stat ".$cmd->getArg(1).": No such file or directory");
-              break;
-            }
-
-            //[TODO] Check if destination directory exist
-            //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
-
-            if($currentView->rename($cmd->getArg(1), $cmd->getArg(2))){
-              $output->writeln("mv ".$cmd->getArg(1)." => ".$cmd->getArg(2));
-            }else{
-              $output->writeln("could not move");
-            }
-
-						break;
-            case 'touch':
-              if($cmd->getNbArgs() === 1){
-                $output->writeln("touch: missing file operand");
-                break;
-              }
-              if($currentView->touch($cmd->getArg(1))){
-                $output->writeln("touch ".$cmd->getArg(1));
-              }
-              else{
-                $output->writeln("could not touch");
-              }
-  						break;
-					case 'rm':
-            if($cmd->getNbArgs()=== 1){
-              $output->writeln("rm: missing file operand");
-              break;
-            }
-            if($currentView->unlink($cmd->getArg(1))){
-              $output->writeln("deleted ".$cmd->getArg(1));
-            }
-            else{
-              $output->writeln("could not remove");
-            }
-						break;
-          case 'rmdir':
-            $output->writeln("rmdir !");
-            break;
-          case 'mkdir':
-            if($cmd->getNbArgs() === 1){
-              $output->writeln("mkdir: missing operand");
-              break;
-            }
-            if($currentView->mkdir($cmd->getArg(1))){
-              $output->writeln("created ".$cmd->getArg(1));
-            }else{
-              $output->writeln("could not create dir");
-            }
-            break;
-					case 'cd':
-
-            if($cmd->getNbArgs() === 1){
-              $currentView->chroot($home);
-              break;
-            }
-            if(!$currentView->file_exists($cmd->getArg(1))){
-              $output->writeln($cmd->getArg(1).": No such file or directory");
-              break;
-            }
-            if(!$currentView->is_dir($cmd->getArg(1))){
-              $output->writeln($cmd->getArg(1).": Not a directory");
-              break;
-            }
-
-            //[TODO] Still need to handle ".." in path
-
-            $currentView->chroot($currentView->getRoot().'/'.$cmd->getArg(1));
-
-						break;
-          case 'sh':
-            //This should allow to execute a basic shell script: parse file passed in first operand, execute each line.
-            $output->writeln("Not implemented yet");
-            break;
-					case '':
-						break;
-					default:
-						$output->writeln("$command: command not found");
-				}
+        if(array_key_exists ( $cmd->getProgram() , $this->programs )){
+          $this->programs[$cmd->getProgram()]->exec($cmd, $output, $currentView);
+        }else{
+          $output->writeln("$command: command not found");
+        }
 
 
 			} while(1);
-
-
 	}
 
+  private function loadPrograms(){
+    $this->programs['cp'] = new Cp($this);
+    $this->programs['ls'] = new Ls($this);
+    $this->programs['cd'] = new Cd($this);
+    $this->programs['mv'] = new Mv($this);
+    $this->programs['rm'] = new Rm($this);
+    $this->programs['touch'] = new Touch($this);
+    $this->programs['mkdir'] = new Mkdir($this);
+  }
+
+  protected function initCLI(OutputInterface $output){
+    $outputStyle = new OutputFormatterStyle('cyan', 'black');
+    $output->getFormatter()->setStyle('PS1_user', $outputStyle);
+    $outputStyle = new OutputFormatterStyle('yellow', 'black');
+    $output->getFormatter()->setStyle('PS1_path', $outputStyle);
+
+    $outputStyle = new OutputFormatterStyle('green', 'black');
+    $output->getFormatter()->setStyle('file', $outputStyle);
+    $outputStyle = new OutputFormatterStyle('blue', 'green');
+    $output->getFormatter()->setStyle('dir', $outputStyle);
+  }
+  
+  public function getHomeView(){
+    return $this->homeView;
+  }
 }
