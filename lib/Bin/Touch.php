@@ -10,27 +10,14 @@ class Touch extends BinBase {
 
   public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
     if($cmd->getNbArgs() === 1){
-      $output->writeln("mv: missing file operand");
+      $output->writeln("touch: missing file operand");
       return;
     }
-    if($cmd->getNbArgs() === 2){
-      $output->writeln("mv: missing destination file operand after ".$cmd->getArg(1));
-      return;
+    if($currentView->touch($cmd->getArg(1))){
+      $output->writeln("touch ".$cmd->getArg(1));
     }
-    // Check if inputfile exist ... (should use stat ?)
-    if(!$currentView->file_exists($cmd->getArg(1))){
-      $output->writeln("mv: cannot stat ".$cmd->getArg(1).": No such file or directory");
-      return;
+    else{
+      $output->writeln("could not touch");
     }
-
-    //[TODO] Check if destination directory exist
-    //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
-
-    if($currentView->rename($cmd->getArg(1), $cmd->getArg(2))){
-      $output->writeln("mv ".$cmd->getArg(1)." => ".$cmd->getArg(2));
-    }else{
-      $output->writeln("could not move");
-    }
-
   }
 }
