@@ -33,6 +33,7 @@ use OCA\NextcloudShell\Bin\Ls;
 use OCA\NextcloudShell\Bin\Mkdir;
 use OCA\NextcloudShell\Bin\Mv;
 use OCA\NextcloudShell\Bin\Rm;
+use OCA\NextcloudShell\Bin\Sh;
 use OCA\NextcloudShell\Bin\Touch;
 
 use OCP\IUserManager;
@@ -88,7 +89,7 @@ class Shell extends Command {
       //[TODO] Autocompletion (might have to extends the Question helper for this)
       //[TODO] History
       //[TODO] Redirection (<>)
-      
+
       // Intercept Ctrl-C signal
       $this->listen();
 
@@ -131,7 +132,7 @@ class Shell extends Command {
         if(array_key_exists ( $cmd->getProgram() , $this->programs )){
           $this->programs[$cmd->getProgram()]->exec($cmd, $output, $currentView);
         }else{
-          $output->writeln("$command: command not found");
+          $output->writeln($cmd->getProgram().": command not found");
         }
 
 
@@ -146,6 +147,7 @@ class Shell extends Command {
     $this->programs['cd'] = new Cd($this);
     $this->programs['mv'] = new Mv($this);
     $this->programs['rm'] = new Rm($this);
+    $this->programs['sh'] = new Sh($this);
     $this->programs['touch'] = new Touch($this);
     $this->programs['mkdir'] = new Mkdir($this);
   }
@@ -167,6 +169,7 @@ class Shell extends Command {
   {
       $handler = function ($code) {
         // Don't do anything for now
+        // We should allow to Ctrl + c to kill the execution of a command.
       };
       // Ctrl + C
       pcntl_signal(SIGINT, $handler);
@@ -175,5 +178,8 @@ class Shell extends Command {
 
   public function getHomeView(){
     return $this->homeView;
+  }
+  public function getPrograms(){
+    return $this->programs;
   }
 }

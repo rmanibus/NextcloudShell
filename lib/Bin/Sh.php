@@ -31,8 +31,36 @@ class Sh extends BinBase {
 
   public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
 
+    if($cmd->getNbArgs() === 1){
+      $output->writeln("sh: missing operand");
+      return;
+    }
+    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+
+    if(!$this->shell->getHomeView()->file_exists( $destinationAbsolutePath  )){
+      $output->writeln("sh: ".$cmd->getArg(1).": No such file or directory");
+      return;
+    }
+    $handle = $this->shell->getHomeView()->fopen($destinationAbsolutePath, 'r');
+    if ($handle) {
+      while (($line = fgets($handle)) !== false) {
+        // process the line read.
+        $lineCmd = new Cmd($line);
+
+        if(array_key_exists ( $cmd->getProgram() , $this->shell->getPrograms() )){
+          $this->shell->getPrograms()[$cmd->getProgram()]->exec($lineCmd, $output, $currentView);
+        }else{
+          $output->writeln($cmd->getProgram().": command not found");
+        }
+      }
+
+      fclose($handle);
+
+    } else {
+        $output->writeln("Could not open file ".$cmd->getArg(1));
+    }
     //This should allow to execute a basic shell script: parse file passed in first operand, execute each line.
-    $output->writeln("Not implemented yet");
+
 
   }
 }
