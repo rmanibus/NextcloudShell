@@ -33,8 +33,10 @@ class Ls extends BinBase {
     if($cmd->getNbArgs() === 1){
       $cmd->setArg(1, "");
     }
+    $destinationAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(1));
+
     //[TODO] Add some formating option (-l ...)
-    array_walk ( $currentView->getDirectoryContent($cmd->getArg(1)) ,function ($fileInfo) use ($output)  {
+    array_walk ( $this->shell->getHomeView()->getDirectoryContent($destinationAbsolutePath) ,function ($fileInfo) use ($output)  {
       if($fileInfo->getType() ==='dir'){
         $output->writeln('<dir>'.$fileInfo->getName().'</dir>');
       }else{
