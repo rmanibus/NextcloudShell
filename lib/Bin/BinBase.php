@@ -31,4 +31,26 @@ abstract class BinBase implements IBin {
     $this->shell = $shell;
   }
 
+  public function getAbsolutePath($currentView, $relativePath){
+
+    $currentLocationArray = explode(  "/" , $this->shell->getHomeView()->getRelativePath($currentView->getRoot()));
+    array_shift ( $currentLocationArray );
+    
+    if(end($currentLocationArray) === "" ){
+        array_pop ( $currentLocationArray );
+    }
+
+    $relativeTargetLocationArray = explode("/", $relativePath);
+
+    foreach($relativeTargetLocationArray as $item){
+      if($item ===".."){
+        array_pop ( $currentLocationArray );
+      }else{
+        array_push ($currentLocationArray, $item) ;
+      }
+    }
+
+    return implode("/", $currentLocationArray);
+  }
+
 }

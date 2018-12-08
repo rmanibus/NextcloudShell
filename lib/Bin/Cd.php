@@ -36,34 +36,18 @@ class Cd extends BinBase {
       return;
     }
 
-    $currentLocationArray = explode(  "/" , $this->shell->getHomeView()->getRelativePath($currentView->getRoot()));
+    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
 
-    if(end($currentLocationArray) === "" ){
-        array_pop ( $currentLocationArray );
-    }
-
-    $relativeTargetLocationArray = explode("/", $cmd->getArg(1));
-
-    foreach($relativeTargetLocationArray as $item){
-      if($item ===".."){
-        array_pop ( $currentLocationArray );
-      }else{
-        array_push ($currentLocationArray, $item) ;
-      }
-    }
-
-    $targetLocation = implode("/", $currentLocationArray);
-
-    if(!$this->shell->getHomeView()->file_exists($targetLocation)){
+    if(!$this->shell->getHomeView()->file_exists($destinationAbsolutePath)){
       $output->writeln($cmd->getArg(1).": No such file or directory");
       return;
     }
-    if(!$this->shell->getHomeView()->is_dir($targetLocation)){
+    if(!$this->shell->getHomeView()->is_dir($destinationAbsolutePath)){
       $output->writeln($cmd->getArg(1).": Not a directory");
       return;
     }
 
-    $currentView->chroot($this->shell->getHomeView()->getRoot().$targetLocation);
+    $currentView->chroot($this->shell->getHomeView()->getRoot().'/'.$destinationAbsolutePath);
 
 
   }
