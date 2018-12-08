@@ -169,7 +169,7 @@ class Shell extends Command {
 
             //[TODO] Check if destination directory exist
             //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
-            
+
             if($currentView->rename($cmdArray[1], $cmdArray[2])){
               $output->writeln("mv $cmdArray[1] => $cmdArray[2]");
             }else{
@@ -181,6 +181,17 @@ class Shell extends Command {
 					case 'rm':
 						$output->writeln("rm !");
 						break;
+          case 'mkdir':
+            if(count($cmdArray) === 1){
+              $output->writeln("mkdir: missing operand");
+              break;
+            }
+            if($currentView->mkdir($cmdArray[1])){
+              $output->writeln("created $cmdArray[1]");
+            }else{
+              $output->writeln("could not create dir");
+            }
+            break;
 					case 'cd':
 
             if(count($cmdArray) === 1){
