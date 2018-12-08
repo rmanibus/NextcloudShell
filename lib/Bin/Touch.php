@@ -34,7 +34,10 @@ class Touch extends BinBase {
       $output->writeln("touch: missing file operand");
       return;
     }
-    if($currentView->touch($cmd->getArg(1))){
+
+    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+
+    if($this->shell->getHomeView()->touch($destinationAbsolutePath)){
       $output->writeln("touch ".$cmd->getArg(1));
     }
     else{
