@@ -33,16 +33,16 @@ class Rm extends BinBase {
   }
   public function exec(Cmd $cmd){
     if($cmd->getNbArgs()=== 1){
-      $output->writeln("rm: missing file operand");
+      $this->writeln("rm: missing file operand");
       return;
     }
     $destinationAbsolutePath = $this->getAbsolutePath( $cmd->getArg(1) );
 
     if($this->context->getHomeView()->unlink($destinationAbsolutePath)){
-      $this->context->getOutput()->writeln("deleted ".$cmd->getArg(1));
+      $this->writeln("deleted ".$cmd->getArg(1));
     }
     else{
-      $this->context->getOutput()->writeln("could not remove");
+      $this->writeln("could not remove");
     }
 
   }

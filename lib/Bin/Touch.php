@@ -33,17 +33,17 @@ class Touch extends BinBase {
   }
   public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
-      $this->context->getOutput()->writeln("touch: missing file operand");
+      $this->writeln("touch: missing file operand");
       return;
     }
 
     $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
     if($this->context->getHomeView()->touch($destinationAbsolutePath)){
-      $this->context->getOutput()->writeln("touch ".$cmd->getArg(1));
+      $this->writeln("touch ".$cmd->getArg(1));
     }
     else{
-      $this->context->getOutput()->writeln("could not touch");
+      $this->writeln("could not touch");
     }
   }
 }

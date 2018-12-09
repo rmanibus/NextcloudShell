@@ -35,17 +35,17 @@ class Cat extends BinBase {
 
   public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
-      $output->writeln("cat: missing operand");
+      $this->writeln("cat: missing operand");
       return;
     }
 
     $destinationAbsolutePath = $this->getAbsolutePath( $cmd->getArg(1) );
 
     if(!$this->context->getHomeView()->file_exists( $destinationAbsolutePath )){
-      $this->context->getOutput()->writeln("cat: ".$cmd->getArg(1).": No such file or directory");
+      $this->writeln("cat: ".$cmd->getArg(1).": No such file or directory");
       return;
     }
-    $this->context->getOutput()->writeln($this->context->getHomeView()->file_get_contents($destinationAbsolutePath));
+    $this->writeln($this->context->getHomeView()->file_get_contents($destinationAbsolutePath));
 
   }
 }

@@ -39,9 +39,9 @@ class Mkdir extends BinBase {
     $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
     if($this->context->getHomeView()->mkdir($destinationAbsolutePath)){
-      $this->context->getOutput()->writeln("created ".$cmd->getArg(1));
+      $this->writeln("created ".$cmd->getArg(1));
     }else{
-      $this->context->getOutput()->writeln("could not create dir");
+      $this->writeln("could not create dir");
     }
   }
 }

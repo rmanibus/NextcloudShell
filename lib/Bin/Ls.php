@@ -28,7 +28,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Ls extends BinBase {
-  
+
   public function getName() : String {
     return 'ls';
   }
@@ -45,9 +45,9 @@ class Ls extends BinBase {
 
     array_walk ( $this->context->getHomeView()->getDirectoryContent($destinationAbsolutePath) ,function ($fileInfo) use ($output)  {
       if($fileInfo->getType() ==='dir'){
-        $this->context->getOutput()->writeln('<dir>'.$fileInfo->getName().'</dir>');
+        $this->writeln('<dir>'.$fileInfo->getName().'</dir>');
       }else{
-        $this->context->getOutput()->writeln('<file>'.$fileInfo->getName().'</file>');
+        $this->writeln('<file>'.$fileInfo->getName().'</file>');
       }
     });
   }

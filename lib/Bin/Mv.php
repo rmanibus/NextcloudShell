@@ -33,20 +33,20 @@ class Mv extends BinBase {
   }
   public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
-      $this->context->getOutput()->writeln("mv: missing file operand");
+      $this->writeln("mv: missing file operand");
       return;
     }
     if($cmd->getNbArgs() === 2){
-      $this->context->getOutput()->writeln("mv: missing destination file operand after ".$cmd->getArg(1));
+      $this->writeln("mv: missing destination file operand after ".$cmd->getArg(1));
       return;
     }
 
     $sourceAbsolutePath = $this->getAbsolutePath( $cmd->getArg(1) );
     $destinationAbsolutePath = $this->getAbsolutePath( $cmd->getArg(2) );
-    
+
     // Check if inputfile exist ... (should use stat ?)
     if(!$this->context->getHomeView()->file_exists( $sourceAbsolutePath )){
-      $this->context->getOutput()->writeln("mv: cannot stat ".$cmd->getArg(1).": No such file or directory");
+      $this->writeln("mv: cannot stat ".$cmd->getArg(1).": No such file or directory");
       return;
     }
 
@@ -54,9 +54,9 @@ class Mv extends BinBase {
     //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
 
     if($this->context->getHomeView()->rename($sourceAbsolutePath , $destinationAbsolutePath)){
-      $this->context->getOutput()->writeln("mv ".$cmd->getArg(1)." => ".$cmd->getArg(2));
+      $this->writeln("mv ".$cmd->getArg(1)." => ".$cmd->getArg(2));
     }else{
-      $this->context->getOutput()->writeln("could not move");
+      $this->writeln("could not move");
     }
 
   }

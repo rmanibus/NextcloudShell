@@ -34,13 +34,13 @@ class Sh extends BinBase {
   public function exec(Cmd $cmd){
 
     if($cmd->getNbArgs() === 1){
-      $this->context->getOutput()->writeln("sh: missing operand");
+      $this->writeln("sh: missing operand");
       return;
     }
     $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
     if(!$this->context->getHomeView()->file_exists( $destinationAbsolutePath  )){
-      $this->context->getOutput()->writeln("sh: ".$cmd->getArg(1).": No such file or directory");
+      $this->writeln("sh: ".$cmd->getArg(1).": No such file or directory");
       return;
     }
     $handle = $this->context->getHomeView()->fopen($destinationAbsolutePath, 'r');
@@ -52,14 +52,14 @@ class Sh extends BinBase {
         if(array_key_exists ( $lineCmd->getProgram() , $this->context->getPrograms() )){
           $this->context->getPrograms()[$lineCmd->getProgram()]->exec($lineCmd);
         }else{
-          $this->context->getOutput()->writeln($lineCmd->getProgram().": command not found");
+          $this->writeln($lineCmd->getProgram().": command not found");
         }
       }
 
       fclose($handle);
 
     } else {
-        $this->context->getOutput()->writeln("Could not open file ".$cmd->getArg(1));
+        $this->writeln("Could not open file ".$cmd->getArg(1));
     }
     //This should allow to execute a basic shell script: parse file passed in first operand, execute each line.
 

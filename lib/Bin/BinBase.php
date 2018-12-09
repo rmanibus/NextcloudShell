@@ -52,5 +52,7 @@ abstract class BinBase implements IBin {
 
     return implode("/", $currentLocationArray);
   }
-
+  protected function writeln($message){
+    $this->context->getOutput()->writeln($message);
+  }
 }

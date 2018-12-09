@@ -41,11 +41,11 @@ class Cd extends BinBase {
     $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
     if(!$this->context->getHomeView()->file_exists($destinationAbsolutePath)){
-      $this->context->getOutput()->writeln($cmd->getArg(1).": No such file or directory");
+      $this->writeln($cmd->getArg(1).": No such file or directory");
       return;
     }
     if(!$this->context->getHomeView()->is_dir($destinationAbsolutePath)){
-      $this->context->getOutput()->writeln($cmd->getArg(1).": Not a directory");
+      $this->writeln($cmd->getArg(1).": Not a directory");
       return;
     }
 
