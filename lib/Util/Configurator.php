@@ -53,6 +53,9 @@ class Configurator {
   }
 
   public function configure($uid){
+    // Intercept Ctrl-C signal
+    $this->listen();
+    
     $this->initUser($uid);
     $this->initFileSystem($uid);
     $this->initCLI($this->context->getOutput());
@@ -98,5 +101,16 @@ class Configurator {
     $this->context->addProgram( new Sh($this->context));
     $this->context->addProgram( new Touch($this->context));
     $this->context->addProgram( new Mkdir($this->context));
+  }
+
+  private function listen()
+  {
+      $handler = function ($code) {
+        // Don't do anything for now
+        // We should allow to Ctrl + c to kill the execution of a command.
+      };
+      // Ctrl + C
+      pcntl_signal(SIGINT, $handler);
+
   }
 }

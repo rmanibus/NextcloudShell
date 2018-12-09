@@ -73,9 +73,6 @@ class Shell extends Command {
       //[TODO] History
       //[TODO] Redirection (<>)
 
-      // Intercept Ctrl-C signal
-      $this->listen();
-
       // Check user
 
 			$uid = $input->getArgument('user');
@@ -110,19 +107,4 @@ class Shell extends Command {
 
 			} while(1);
 	}
-
-
-
-
-
-  private function listen()
-  {
-      $handler = function ($code) {
-        // Don't do anything for now
-        // We should allow to Ctrl + c to kill the execution of a command.
-      };
-      // Ctrl + C
-      pcntl_signal(SIGINT, $handler);
-
-  }
 }
