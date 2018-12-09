@@ -28,32 +28,35 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Mv extends BinBase {
-
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function getName() : String {
+    return 'mv';
+  }
+  public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
-      $output->writeln("mv: missing file operand");
+      $this->context->getOutput()->writeln("mv: missing file operand");
       return;
     }
     if($cmd->getNbArgs() === 2){
-      $output->writeln("mv: missing destination file operand after ".$cmd->getArg(1));
+      $this->context->getOutput()->writeln("mv: missing destination file operand after ".$cmd->getArg(1));
       return;
     }
 
-    $sourceAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(1));
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(2));
+    $sourceAbsolutePath = $this->getAbsolutePath( $cmd->getArg(1) );
+    $destinationAbsolutePath = $this->getAbsolutePath( $cmd->getArg(2) );
+    
     // Check if inputfile exist ... (should use stat ?)
-    if(!$this->shell->getHomeView()->file_exists( $sourceAbsolutePath )){
-      $output->writeln("mv: cannot stat ".$cmd->getArg(1).": No such file or directory");
+    if(!$this->context->getHomeView()->file_exists( $sourceAbsolutePath )){
+      $this->context->getOutput()->writeln("mv: cannot stat ".$cmd->getArg(1).": No such file or directory");
       return;
     }
 
     //[TODO] Check if destination directory exist
     //[TODO] Check if destination is a directory (in this case, keep filename & copy in dir)
 
-    if($this->shell->getHomeView()->rename($sourceAbsolutePath , $destinationAbsolutePath)){
-      $output->writeln("mv ".$cmd->getArg(1)." => ".$cmd->getArg(2));
+    if($this->context->getHomeView()->rename($sourceAbsolutePath , $destinationAbsolutePath)){
+      $this->context->getOutput()->writeln("mv ".$cmd->getArg(1)." => ".$cmd->getArg(2));
     }else{
-      $output->writeln("could not move");
+      $this->context->getOutput()->writeln("could not move");
     }
 
   }

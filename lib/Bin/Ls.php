@@ -28,19 +28,26 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Ls extends BinBase {
+  
+  public function getName() : String {
+    return 'ls';
+  }
 
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
       $cmd->setArg(1, "");
     }
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView , $cmd->getArg(1));
+
+    $destinationAbsolutePath = $this->getAbsolutePath( $cmd->getArg(1));
 
     //[TODO] Add some formating option (-l ...)
-    array_walk ( $this->shell->getHomeView()->getDirectoryContent($destinationAbsolutePath) ,function ($fileInfo) use ($output)  {
+    $output = $this->context->getOutput();
+
+    array_walk ( $this->context->getHomeView()->getDirectoryContent($destinationAbsolutePath) ,function ($fileInfo) use ($output)  {
       if($fileInfo->getType() ==='dir'){
-        $output->writeln('<dir>'.$fileInfo->getName().'</dir>');
+        $this->context->getOutput()->writeln('<dir>'.$fileInfo->getName().'</dir>');
       }else{
-        $output->writeln('<file>'.$fileInfo->getName().'</file>');
+        $this->context->getOutput()->writeln('<file>'.$fileInfo->getName().'</file>');
       }
     });
   }

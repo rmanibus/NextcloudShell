@@ -25,15 +25,15 @@ namespace OCA\NextcloudShell\Bin;
 
 abstract class BinBase implements IBin {
 
-  protected $shell;
+  protected $context;
 
-  public function __construct($shell){
-    $this->shell = $shell;
+  public function __construct($context){
+    $this->context = $context;
   }
   // This get the absolute path in the user context. (It mean that "/" is in fact "<user>/files/" )
-  public function getAbsolutePath($currentView, $relativePath){
+  public function getAbsolutePath($relativePath){
 
-    $currentLocationArray = explode(  "/" , $this->shell->getHomeView()->getRelativePath($currentView->getRoot()));
+    $currentLocationArray = explode(  "/" , $this->context->getHomeView()->getRelativePath($this->context->getCurrentView()->getRoot()));
     array_shift ( $currentLocationArray );
 
     if(end($currentLocationArray) === "" ){

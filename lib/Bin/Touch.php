@@ -28,20 +28,22 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Touch extends BinBase {
-
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function getName() : String {
+    return 'touch';
+  }
+  public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
-      $output->writeln("touch: missing file operand");
+      $this->context->getOutput()->writeln("touch: missing file operand");
       return;
     }
 
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+    $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
-    if($this->shell->getHomeView()->touch($destinationAbsolutePath)){
-      $output->writeln("touch ".$cmd->getArg(1));
+    if($this->context->getHomeView()->touch($destinationAbsolutePath)){
+      $this->context->getOutput()->writeln("touch ".$cmd->getArg(1));
     }
     else{
-      $output->writeln("could not touch");
+      $this->context->getOutput()->writeln("could not touch");
     }
   }
 }

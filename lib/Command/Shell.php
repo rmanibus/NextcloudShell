@@ -35,6 +35,8 @@ use OCA\NextcloudShell\Bin\Mv;
 use OCA\NextcloudShell\Bin\Rm;
 use OCA\NextcloudShell\Bin\Sh;
 use OCA\NextcloudShell\Bin\Touch;
+use OCA\NextcloudShell\Bin\IBin;
+use OCA\NextcloudShell\Util\Context;
 
 use OCP\IUserManager;
 use OC\Files\Filesystem;
@@ -52,17 +54,16 @@ class Shell extends Command {
 	protected $questionHelper;
 	/** @var IUserManager */
 	protected $userManager;
-  /** @var View */
-  protected $homeView ;
-  /** @var array IBin */
-  protected $programs = array();
+  /** @var Context */
+  protected $context ;
 
-	public function __construct(QuestionHelper $questionHelper, IUserManager $userManager) {
+	public function __construct(QuestionHelper $questionHelper, IUserManager $userManager, Context $context) {
 		$this->questionHelper = $questionHelper;
 		$this->userManager = $userManager;
+    $this->context = $context ;
 
     // We need a way to get all class implementing IBin. That would make this way simpler.
-    $this->loadPrograms();
+    $this->loadPrograms($context);
 
 		parent::__construct();
 
@@ -102,28 +103,28 @@ class Shell extends Command {
 				$output->writeln('User "' . $uid . '" unknown.');
 				return;
 			}
-			$user = $this->userManager->get($uid);
+			$this->context->setUser( $this->userManager->get($uid));
+			$this->context->getUser()->updateLastLoginTimestamp();
+
+      $home = '/' . $uid . '/files';
+			FileSystem::init($uid,  $home);
+			$this->context->setHomeView( Filesystem::getView());
+      $this->context->setCurrentView( new View($home));
+      $this->context->setOutput($output);
 
       // Init CLI Style
       $this->initCLI($output);
 
       // Login Message
 			$output->writeln('This is the shell');
-			$output->writeln('last login: '.date(DATE_RFC2822, $user->getLastLogin()));
-			$user->updateLastLoginTimestamp();
+			$output->writeln('last login: '.date(DATE_RFC2822, $this->context->getUser()->getLastLogin()));
 
-      // Init FileSystem
-			$absoluteHome = $user->getHome();
-      $home = '/' . $uid . '/files';
-
-			FileSystem::init($uid,  $home);
-			$this->homeView = Filesystem::getView();
-      $currentView = new View($home);
-
+      //var_dump(getenv('PATH'));
       // CLI Loop
+
 			do{
 
-				$question = new Question('<PS1_user>'.$user->getUID()."@nextcloud</PS1_user>: <PS1_path>".$this->homeView->getRelativePath($currentView->getRoot())."</PS1_path> $ ");
+				$question = new Question('<PS1_user>'.$this->context->getUser()->getUID()."@nextcloud</PS1_user>: <PS1_path>".$this->context->getHomeView()->getRelativePath($this->context->getCurrentView()->getRoot())."</PS1_path> $ ");
 
         $cmd = new Cmd($this->questionHelper->ask($input, $output, $question));
         if($cmd->getProgram() === "exit"){
@@ -132,8 +133,8 @@ class Shell extends Command {
         if($cmd->getProgram() === null){
           continue;
         }
-        if(array_key_exists ( $cmd->getProgram() , $this->programs )){
-          $this->programs[$cmd->getProgram()]->exec($cmd, $output, $currentView);
+        if(array_key_exists ( $cmd->getProgram() , $this->context->getPrograms() )){
+          $this->context->getProgram($cmd->getProgram())->exec($cmd);
         }else{
           $output->writeln($cmd->getProgram().": command not found");
         }
@@ -144,15 +145,15 @@ class Shell extends Command {
 
   private function loadPrograms(){
     //[TODO] get this by reflexion (all class implementing IBin).
-    $this->programs['cat'] = new Cat($this);
-    $this->programs['cp'] = new Cp($this);
-    $this->programs['ls'] = new Ls($this);
-    $this->programs['cd'] = new Cd($this);
-    $this->programs['mv'] = new Mv($this);
-    $this->programs['rm'] = new Rm($this);
-    $this->programs['sh'] = new Sh($this);
-    $this->programs['touch'] = new Touch($this);
-    $this->programs['mkdir'] = new Mkdir($this);
+    $this->context->addProgram( new Cat($this->context));
+    $this->context->addProgram( new Cp($this->context));
+    $this->context->addProgram( new Ls($this->context));
+    $this->context->addProgram( new Cd($this->context));
+    $this->context->addProgram( new Mv($this->context));
+    $this->context->addProgram( new Rm($this->context));
+    $this->context->addProgram( new Sh($this->context));
+    $this->context->addProgram( new Touch($this->context));
+    $this->context->addProgram( new Mkdir($this->context));
   }
 
   protected function initCLI(OutputInterface $output){

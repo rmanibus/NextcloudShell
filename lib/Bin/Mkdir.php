@@ -28,18 +28,20 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Mkdir extends BinBase {
-
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function getName() : String {
+    return 'mkdir';
+  }
+  public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
       $output->writeln("mkdir: missing operand");
       return;
     }
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+    $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
-    if($this->shell->getHomeView()->mkdir($destinationAbsolutePath)){
-      $output->writeln("created ".$cmd->getArg(1));
+    if($this->context->getHomeView()->mkdir($destinationAbsolutePath)){
+      $this->context->getOutput()->writeln("created ".$cmd->getArg(1));
     }else{
-      $output->writeln("could not create dir");
+      $this->context->getOutput()->writeln("could not create dir");
     }
   }
 }

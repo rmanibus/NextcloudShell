@@ -28,5 +28,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 interface Ibin {
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView);
+  public function getName() : String;
+  public function exec(Cmd $cmd);
 }

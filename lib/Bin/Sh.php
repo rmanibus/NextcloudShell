@@ -28,36 +28,38 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Sh extends BinBase {
-
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function getName() : String {
+    return 'sh';
+  }
+  public function exec(Cmd $cmd){
 
     if($cmd->getNbArgs() === 1){
-      $output->writeln("sh: missing operand");
+      $this->context->getOutput()->writeln("sh: missing operand");
       return;
     }
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+    $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
-    if(!$this->shell->getHomeView()->file_exists( $destinationAbsolutePath  )){
-      $output->writeln("sh: ".$cmd->getArg(1).": No such file or directory");
+    if(!$this->context->getHomeView()->file_exists( $destinationAbsolutePath  )){
+      $this->context->getOutput()->writeln("sh: ".$cmd->getArg(1).": No such file or directory");
       return;
     }
-    $handle = $this->shell->getHomeView()->fopen($destinationAbsolutePath, 'r');
+    $handle = $this->context->getHomeView()->fopen($destinationAbsolutePath, 'r');
     if ($handle) {
       while (($line = fgets($handle)) !== false) {
         // process the line read.
         $lineCmd = new Cmd($line);
 
-        if(array_key_exists ( $lineCmd->getProgram() , $this->shell->getPrograms() )){
-          $this->shell->getPrograms()[$lineCmd->getProgram()]->exec($lineCmd, $output, $currentView);
+        if(array_key_exists ( $lineCmd->getProgram() , $this->context->getPrograms() )){
+          $this->context->getPrograms()[$lineCmd->getProgram()]->exec($lineCmd);
         }else{
-          $output->writeln($lineCmd->getProgram().": command not found");
+          $this->context->getOutput()->writeln($lineCmd->getProgram().": command not found");
         }
       }
 
       fclose($handle);
 
     } else {
-        $output->writeln("Could not open file ".$cmd->getArg(1));
+        $this->context->getOutput()->writeln("Could not open file ".$cmd->getArg(1));
     }
     //This should allow to execute a basic shell script: parse file passed in first operand, execute each line.
 

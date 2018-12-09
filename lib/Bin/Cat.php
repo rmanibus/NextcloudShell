@@ -29,19 +29,23 @@ use OC\Files\View;
 
 class Cat extends BinBase {
 
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function getName() : String {
+    return 'cat';
+  }
+
+  public function exec(Cmd $cmd){
     if($cmd->getNbArgs() === 1){
       $output->writeln("cat: missing operand");
       return;
     }
 
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+    $destinationAbsolutePath = $this->getAbsolutePath( $cmd->getArg(1) );
 
-    if(!$this->shell->getHomeView()->file_exists( $destinationAbsolutePath )){
-      $output->writeln("cat: ".$cmd->getArg(1).": No such file or directory");
+    if(!$this->context->getHomeView()->file_exists( $destinationAbsolutePath )){
+      $this->context->getOutput()->writeln("cat: ".$cmd->getArg(1).": No such file or directory");
       return;
     }
-    $output->writeln($this->shell->getHomeView()->file_get_contents($destinationAbsolutePath));
+    $this->context->getOutput()->writeln($this->context->getHomeView()->file_get_contents($destinationAbsolutePath));
 
   }
 }

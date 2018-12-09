@@ -28,26 +28,28 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Cd extends BinBase {
-
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function getName() : String {
+    return 'cd';
+  }
+  public function exec( Cmd $cmd ){
 
     if($cmd->getNbArgs() === 1){
-      $currentView->chroot($this->shell->getHomeView()->getRoot());
+      $this->context->getCurrentView()->chroot($this->context->getHomeView()->getRoot());
       return;
     }
 
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+    $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
-    if(!$this->shell->getHomeView()->file_exists($destinationAbsolutePath)){
-      $output->writeln($cmd->getArg(1).": No such file or directory");
+    if(!$this->context->getHomeView()->file_exists($destinationAbsolutePath)){
+      $this->context->getOutput()->writeln($cmd->getArg(1).": No such file or directory");
       return;
     }
-    if(!$this->shell->getHomeView()->is_dir($destinationAbsolutePath)){
-      $output->writeln($cmd->getArg(1).": Not a directory");
+    if(!$this->context->getHomeView()->is_dir($destinationAbsolutePath)){
+      $this->context->getOutput()->writeln($cmd->getArg(1).": Not a directory");
       return;
     }
 
-    $currentView->chroot($this->shell->getHomeView()->getRoot().'/'.$destinationAbsolutePath);
+    $this->context->getCurrentView()->chroot($this->context->getHomeView()->getRoot().'/'.$destinationAbsolutePath);
 
 
   }

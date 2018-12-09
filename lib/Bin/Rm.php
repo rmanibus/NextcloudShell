@@ -28,19 +28,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 use OC\Files\View;
 
 class Rm extends BinBase {
-
-  public function exec(Cmd $cmd, OutputInterface $output, View $currentView){
+  public function getName() : String {
+    return 'rm';
+  }
+  public function exec(Cmd $cmd){
     if($cmd->getNbArgs()=== 1){
       $output->writeln("rm: missing file operand");
       return;
     }
-    $destinationAbsolutePath = $this->getAbsolutePath($currentView,$cmd->getArg(1));
+    $destinationAbsolutePath = $this->getAbsolutePath( $cmd->getArg(1) );
 
-    if($this->shell->getHomeView()->unlink($destinationAbsolutePath)){
-      $output->writeln("deleted ".$cmd->getArg(1));
+    if($this->context->getHomeView()->unlink($destinationAbsolutePath)){
+      $this->context->getOutput()->writeln("deleted ".$cmd->getArg(1));
     }
     else{
-      $output->writeln("could not remove");
+      $this->context->getOutput()->writeln("could not remove");
     }
 
   }
