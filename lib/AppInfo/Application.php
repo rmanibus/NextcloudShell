@@ -10,8 +10,5 @@ class Application extends App {
 		parent::__construct('nextcloudShell', $urlParams);
 		$container = $this->getContainer();
 		$server = $container->getServer();
-
-    $context = $c->query('Context');
-    var_dump('ooooh');
   }
 }
