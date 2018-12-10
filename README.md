@@ -6,6 +6,10 @@ The goal is to implement a SSH shell for Nextcloud users.
 
 This app do not provide any kind of authentication as it will be handled by OpenSSH.
 
+Target Architecture:
+![shellDescription.png](https://raw.githubusercontent.com/rmanibus/NextcloudShell/master/.github/images/shellDescription.png)
+
+
 start with:
 ```
 php occ nextcloudshell:run <uid>
