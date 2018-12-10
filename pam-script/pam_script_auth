@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# set path for verbose logging
+
+
+
+DIR="$(cd "/mnt/c/Users/loich/workspace/server" && pwd)"
+LOGFILE=$DIR/pam-script-nextcloud.log
+OUTPUT=$(/usr/bin/env php "$DIR/occ" nextcloudshell:auth "$@")
+RETCODE=$?
+
+
+if [[ -n "$LOGFILE" ]]; then
+    echo "[$(/usr/bin/env date -R)] $OUTPUT" >> $LOGFILE
+fi
+
+exit $RETCODE

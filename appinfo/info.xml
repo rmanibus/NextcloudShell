@@ -20,10 +20,10 @@
             <route>nextcloudshell.page.index</route>
         </navigation>
     </navigations>
-	
+
 	<commands>
 		<command>OCA\NextcloudShell\Command\Shell</command>
-
+    <command>OCA\NextcloudShell\Command\Auth</command>
 	</commands>
 
 </info>
