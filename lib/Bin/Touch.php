@@ -21,29 +21,29 @@
  *
  */
 
-namespace OCA\NextcloudShell\Bin;
+ namespace OCA\NextcloudShell\Bin;
 
-use OCA\NextcloudShell\Util\Cmd;
-use Symfony\Component\Console\Output\OutputInterface;
-use OC\Files\View;
+ use OCA\NextcloudShell\Util\Cmd;
+ use Symfony\Component\Console\Output\OutputInterface;
+ use OC\Files\View;
 
-class Touch extends BinBase {
-  public function getName() : String {
-    return 'touch';
-  }
-  public function exec(Cmd $cmd){
-    if($cmd->getNbArgs() === 1){
-      $this->writeln("touch: missing file operand");
-      return;
-    }
+ class Touch extends BinBase {
+   public function getName() : String {
+     return 'touch';
+   }
+   public function exec(Cmd $cmd){
+     if($cmd->getNbArgs() === 1){
+       $this->writeln("touch: missing file operand");
+       return;
+     }
 
-    $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
+     $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
-    if($this->context->getHomeView()->touch($destinationAbsolutePath)){
-      $this->writeln("touch ".$cmd->getArg(1));
-    }
-    else{
-      $this->writeln("could not touch");
-    }
-  }
-}
+     if($this->context->getHomeView()->touch($destinationAbsolutePath)){
+       $this->writeln("touch ".$cmd->getArg(1));
+     }
+     else{
+       $this->writeln("could not touch");
+     }
+   }
+ }
