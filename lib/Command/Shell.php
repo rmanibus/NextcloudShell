@@ -35,17 +35,23 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Question\Question;
 
+use OCP\IUserManager;
+
 class Shell extends Command {
   /** @var  QuestionHelper */
   protected $questionHelper;
   /** @var Context */
   protected $context ;
   protected $configurator;
-  public function __construct(QuestionHelper $questionHelper, Context $context, Configurator $configurator) {
+  /** @var IUserManager */
+  protected $userManager;
+
+  public function __construct(QuestionHelper $questionHelper, Context $context, Configurator $configurator, IUserManager $userManager) {
 
     $this->questionHelper = $questionHelper;
     $this->context = $context ;
     $this->configurator = $configurator;
+    $this->userManager = $userManager;
 
     parent::__construct();
 
@@ -59,12 +65,13 @@ class Shell extends Command {
     $this
     ->setName('nextcloudshell:run')
     ->setDescription('Run Nextcloud shell.');
-
+    /*
     $this->addArgument(
       'user',
       InputArgument::REQUIRED,
       'user which should be recovered'
     );
+    */
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
@@ -75,7 +82,27 @@ class Shell extends Command {
 
     // Check user
 
-    $uid = $input->getArgument('user');
+    $uid = getenv('USER'); //$input->getArgument('user');
+
+    $question = new Question('password ?');
+    $question->setHidden(true);
+
+
+    for($i = 1; $i <= 3; $i++){
+      $password = $this->questionHelper->ask($input, $output, $question);
+      $auth = $this->authenticate($uid, $password);
+      if($auth){
+        break;
+      }
+    }
+    
+    if(!$auth){
+      $output->writeln('authentication failed');
+      return;
+    }
+
+    $this->context->setUser( $auth);
+    $this->context->getUser()->updateLastLoginTimestamp();
 
     $this->context->setOutput($output);
     $this->configurator->configure($uid);
@@ -106,5 +133,9 @@ class Shell extends Command {
 
 
     } while(1);
+  }
+
+  protected function authenticate($uid, $password){
+    return $this->userManager->checkPassword($uid, $password);
   }
 }

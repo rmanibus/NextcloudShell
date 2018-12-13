@@ -23,7 +23,7 @@
 
 namespace OCA\NextcloudShell\Util;
 
-use OCP\IUserManager;
+
 use OC\Files\Filesystem;
 use OC\Files\View;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,19 +44,17 @@ class Configurator {
 
   /** @var Context */
   protected $context;
-  /** @var IUserManager */
-  protected $userManager;
 
-  public function __construct(Context $context, IUserManager $userManager){
+
+  public function __construct(Context $context){
     $this->context = $context;
-    $this->userManager = $userManager;
+
   }
 
   public function configure($uid){
     // Intercept Ctrl-C signal
     $this->listen();
 
-    $this->initUser($uid);
     $this->initFileSystem($uid);
     $this->initCLI($this->context->getOutput());
     $this->loadPrograms();
@@ -74,16 +72,7 @@ class Configurator {
     $outputStyle = new OutputFormatterStyle('blue', 'green');
     $output->getFormatter()->setStyle('dir', $outputStyle);
   }
-  protected function initUser($uid){
-    $userExists = $this->userManager->userExists($uid);
 
-    if ($userExists === false) {
-      $output->writeln('User "' . $uid . '" unknown.');
-      return;
-    }
-    $this->context->setUser( $this->userManager->get($uid));
-    $this->context->getUser()->updateLastLoginTimestamp();
-  }
   protected function initFileSystem($uid){
     $home = '/' . $uid . '/files';
     FileSystem::init($uid,  $home);
