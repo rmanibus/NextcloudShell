@@ -26,8 +26,18 @@ namespace OCA\NextcloudShell\Command;
   use Symfony\Component\Console\Command\Command;
   use Symfony\Component\Console\Input\InputInterface;
   use Symfony\Component\Console\Output\OutputInterface;
+  use Symfony\Component\Console\Helper\QuestionHelper;
+  use Symfony\Component\Console\Question\Question;
 
 class Auth extends Command {
+
+  protected $questionHelper;
+
+  public function __construct(QuestionHelper $questionHelper){
+    $this->questionHelper = $questionHelper;
+    parent::__construct();
+
+  }
   protected function configure() {
     $this
     ->setName('nextcloudshell:auth')
@@ -35,8 +45,8 @@ class Auth extends Command {
 
   }
     protected function execute(InputInterface $input, OutputInterface $output) {
-      $output->writeln("hello:");
-      $output->writeln(getenv('PAM_USER'));
+      // Does not do anything for now. this class should be used for public key authentication.
+      $output->writeln(getenv('USER'));
       return 0;
     }
 }
