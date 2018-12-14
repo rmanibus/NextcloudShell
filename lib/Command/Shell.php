@@ -82,7 +82,7 @@ class Shell extends Command {
 
     // Check user
     if($input->getArgument('user')){
-      $uid == $input->getArgument('user')
+      $uid == $input->getArgument('user');
     }else if(getenv('USER')){
       $uid = getenv('USER');
     }else{
