@@ -35,49 +35,69 @@ class Sh extends BinBase {
   public function getName() : String {
     return 'sh';
   }
+
   public function exec(Cmd $cmd){
 
+
     if($cmd->getNbArgs() === 1){
-      $this->writeln("sh: missing operand");
+      $this->doSh($this->context->getInput());
       return;
-    }
-    $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
-    if(!$this->context->getHomeView()->file_exists( $destinationAbsolutePath  )){
-      $this->writeln("sh: ".$cmd->getArg(1).": No such file or directory");
-      return;
-    }
-    $handle = $this->context->getHomeView()->fopen($destinationAbsolutePath, 'r');
-    if ($handle) {
+    }else{
 
-      // We Should we create a new context, and reset the existing context at the end.
-      $question = new Question('');
+      $destinationAbsolutePath = $this->getAbsolutePath($cmd->getArg(1));
 
-      $input = new StringInput('');
-      $input->setStream($handle);
-      $questionHelper = new QuestionHelper();
-
-      while (!feof($handle)) {
-        // process the line read.
-        $lineCmd = new Cmd($questionHelper->ask($input, $this->context->getOutput(), $question));
-
-        if(array_key_exists ( $lineCmd->getProgram() , $this->context->getPrograms() )){
-          $this->context->getPrograms()[$lineCmd->getProgram()]->exec($lineCmd);
-        }else{
-          $this->writeln($lineCmd->getProgram().": command not found");
-        }
+      if(!$this->context->getHomeView()->file_exists( $destinationAbsolutePath  )){
+        $this->writeln("sh: ".$cmd->getArg(1).": No such file or directory");
+        return;
       }
+      $handle = $this->context->getHomeView()->fopen($destinationAbsolutePath, 'r');
+      if ($handle) {
+        $input = new StringInput('');
+        $input->setStream($handle);
+        $this->doSh($input);
 
-
-      //$this->context->getInput()->setStream(false);
-
-      fclose($handle);
-
-    } else {
-      $this->writeln("Could not open file ".$cmd->getArg(1));
+        fclose($handle);
+      }
+      else {
+        $this->writeln("Could not open file ".$cmd->getArg(1));
+      }
     }
+
+
+
     //This should allow to execute a basic shell script: parse file passed in first operand, execute each line.
 
 
+  }
+
+  protected function doSh($input){
+    $questionHelper = new QuestionHelper();
+    while (!$this->eof($input)) {
+      $question = new Question($this->getPS1());
+
+      $lineCmd = new Cmd($questionHelper->ask($input, $this->context->getOutput(), $question));
+      if($lineCmd->getProgram() === "exit"){
+        return;
+      }
+      if($lineCmd->getProgram() === null){
+        continue;
+      }
+      if(array_key_exists ( $lineCmd->getProgram() , $this->context->getPrograms() )){
+        $this->context->getProgram($lineCmd->getProgram())->exec($lineCmd);
+      }else{
+        $output->writeln($lineCmd->getProgram().": command not found");
+      }
+    }
+  }
+
+  protected function eof($input){
+    if(!$input->getStream()){
+      return false;
+    }
+    return feof($input->getStream());
+  }
+  protected function getPS1(){
+    return '<PS1_user>'.$this->context->getUser()->getUID()."@nextcloud</PS1_user>: <PS1_path>".$this->context->getHomeView()->getRelativePath($this->context->getCurrentView()->getRoot())."</PS1_path> $ ";
   }
 }

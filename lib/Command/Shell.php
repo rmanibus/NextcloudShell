@@ -120,28 +120,11 @@ class Shell extends Command {
     $output->writeln('last login: '.date(DATE_RFC2822, $this->context->getUser()->getLastLogin()));
 
     //var_dump(getenv('PATH'));
-    // CLI Loop
-
-    do{
-
-      $question = new Question('<PS1_user>'.$this->context->getUser()->getUID()."@nextcloud</PS1_user>: <PS1_path>".$this->context->getHomeView()->getRelativePath($this->context->getCurrentView()->getRoot())."</PS1_path> $ ");
-
-      $cmd = new Cmd($this->questionHelper->ask($input, $output, $question));
-
-      if($cmd->getProgram() === "exit"){
-        break;
-      }
-      if($cmd->getProgram() === null){
-        continue;
-      }
-      if(array_key_exists ( $cmd->getProgram() , $this->context->getPrograms() )){
-        $this->context->getProgram($cmd->getProgram())->exec($cmd);
-      }else{
-        $output->writeln($cmd->getProgram().": command not found");
-      }
 
 
-    } while(1);
+    $cmd = new Cmd('sh');
+    $this->context->getProgram($cmd->getProgram())->exec($cmd);
+
   }
 
   protected function authenticate($uid, $password){
