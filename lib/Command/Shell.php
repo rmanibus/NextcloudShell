@@ -65,13 +65,13 @@ class Shell extends Command {
     $this
     ->setName('nextcloudshell:run')
     ->setDescription('Run Nextcloud shell.');
-    /*
+
     $this->addArgument(
       'user',
-      InputArgument::REQUIRED,
+      InputArgument::OPTIONAL,
       'user which should be recovered'
     );
-    */
+
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
@@ -81,8 +81,15 @@ class Shell extends Command {
     //[TODO] Redirection (<>)
 
     // Check user
-
-    $uid = getenv('USER'); //$input->getArgument('user');
+    if($input->getArgument('user')){
+      $uid == $input->getArgument('user')
+    }else if(getenv('USER')){
+      $uid = getenv('USER');
+    }else{
+      $question = new Question('user ?');
+      $uid = $this->questionHelper->ask($input, $output, $question);
+      return;
+    }
 
     $question = new Question('password ?');
     $question->setHidden(true);
@@ -95,7 +102,7 @@ class Shell extends Command {
         break;
       }
     }
-    
+
     if(!$auth){
       $output->writeln('authentication failed');
       return;
