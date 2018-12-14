@@ -45,10 +45,8 @@ class Configurator {
   /** @var Context */
   protected $context;
 
-
   public function __construct(Context $context){
     $this->context = $context;
-
   }
 
   public function configure($uid){

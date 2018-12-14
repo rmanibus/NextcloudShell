@@ -26,10 +26,14 @@ namespace OCA\NextcloudShell\Util;
 use OCP\IUser;
 use OC\Files\View;
 use OCA\NextcloudShell\Bin\IBin;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\QuestionHelper;
 
 class Context {
 
+  /** @var InputInterface */
+  protected $input;
   /** @var OutputInterface */
   protected $output;
 
@@ -41,15 +45,26 @@ class Context {
   protected $currentView ;
   /** @var array IBin */
   protected $programs = array();
+  /** @var  QuestionHelper */
+  protected $questionHelper;
 
   protected $initialized = false;
 
-  public function __construct(){
-
-
+  public function __construct(QuestionHelper $questionHelper){
+    $this->questionHelper = $questionHelper;
+    
+  }
+  public function getQuestionHelper(){
+    return $this->questionHelper;
   }
   public function isInitialized(){
-    return isset($output) && isset($user) && isset($homeView) && isset($currentView) && isset($programs);
+    return  isset($input) && isset($output) && isset($user) && isset($homeView) && isset($currentView) && isset($programs);
+  }
+  public function setInput(InputInterface $input){
+    $this->input = $input;
+  }
+  public function getInput(){
+    return $this->input;
   }
   public function setOutput(OutputInterface $output){
     $this->output = $output;

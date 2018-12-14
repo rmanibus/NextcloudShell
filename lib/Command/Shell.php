@@ -42,6 +42,7 @@ class Shell extends Command {
   protected $questionHelper;
   /** @var Context */
   protected $context ;
+  /** @var Configurator */
   protected $configurator;
   /** @var IUserManager */
   protected $userManager;
@@ -110,7 +111,7 @@ class Shell extends Command {
 
     $this->context->setUser( $auth);
     $this->context->getUser()->updateLastLoginTimestamp();
-
+    $this->context->setInput($input);
     $this->context->setOutput($output);
     $this->configurator->configure($uid);
 
@@ -126,6 +127,7 @@ class Shell extends Command {
       $question = new Question('<PS1_user>'.$this->context->getUser()->getUID()."@nextcloud</PS1_user>: <PS1_path>".$this->context->getHomeView()->getRelativePath($this->context->getCurrentView()->getRoot())."</PS1_path> $ ");
 
       $cmd = new Cmd($this->questionHelper->ask($input, $output, $question));
+
       if($cmd->getProgram() === "exit"){
         break;
       }

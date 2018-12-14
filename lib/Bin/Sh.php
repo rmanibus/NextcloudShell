@@ -24,10 +24,14 @@
 namespace OCA\NextcloudShell\Bin;
 
 use OCA\NextcloudShell\Util\Cmd;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Question\Question;
 use OC\Files\View;
 
 class Sh extends BinBase {
+
   public function getName() : String {
     return 'sh';
   }
@@ -45,9 +49,17 @@ class Sh extends BinBase {
     }
     $handle = $this->context->getHomeView()->fopen($destinationAbsolutePath, 'r');
     if ($handle) {
-      while (($line = fgets($handle)) !== false) {
+
+      // We Should we create a new context, and reset the existing context at the end.
+      $question = new Question('');
+
+      $input = new StringInput('');
+      $input->setStream($handle);
+      $questionHelper = new QuestionHelper();
+
+      while (!feof($handle)) {
         // process the line read.
-        $lineCmd = new Cmd($line);
+        $lineCmd = new Cmd($questionHelper->ask($input, $this->context->getOutput(), $question));
 
         if(array_key_exists ( $lineCmd->getProgram() , $this->context->getPrograms() )){
           $this->context->getPrograms()[$lineCmd->getProgram()]->exec($lineCmd);
@@ -55,6 +67,9 @@ class Sh extends BinBase {
           $this->writeln($lineCmd->getProgram().": command not found");
         }
       }
+
+
+      //$this->context->getInput()->setStream(false);
 
       fclose($handle);
 
